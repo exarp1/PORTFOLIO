@@ -1,0 +1,175 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Testing</title>
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<link href="css/reset.css" rel="stylesheet">
+<link href="css/jquery-ui.css" rel="stylesheet">
+<script src="js/external/jquery/jquery.js"></script>
+<script src="js/jquery-ui.min.js"></script>
+
+<style>
+.drop-hover{ background-color: #FF0; }
+.drop-hover2{ background-color: #00F; }
+.root, .root2{ 
+  width: 400px; 
+  border: 1px dotted blue;
+}
+.sortList:not(.root)
+{
+  padding-left: 25px; 
+}
+.top: '0px', left: '0px' 
+</style>
+
+<script>
+// Load a list of menu items to make sortable and draggable
+var DATA = [
+  'HOME'
+  ,'COMPANY'
+  ,'RESIDENTIAL'
+  ,'COMMERCIAL'
+  ,'CONTACT US'
+  ,'Nest thermostats - NEW!'
+  ,'THE AIRTECH ADVANTAGE'
+  ,'Ask Airtech'
+  ,'Testimonials'
+  ,'Safety'
+  ,'Partners'
+  ,'Employment'
+  ,'Privacy Policy'
+  ,'Replacements/Upgrades'
+]
+
+// on document.ready() use this event handler function to do the work:
+$(function() {
+
+  // Here we sort out whether we can drop a menu item in the sortable list.
+  // For items that are identical, we check the following condition:
+  // Is this item a child of itself?:
+  // If so, we block the drop
+  // If not, we allow it. (n.b. this scheme allows 'twin siblings' only)
+  function addDroppable($menuItem){
+    // handle droppable menu Items
+    $menuItem.droppable(
+        {
+          tolerance: 'pointer',		// use pointer cursor when dragging
+          hoverClass: "drop-hover",	// used for visual cues / debugging
+          greedy: true,				// bubble dropped elements to bottom
+
+            // drop() callback f(x) initialize:
+          drop: function(e, ui)
+          {
+            var $target = $(e.target);				// hold event target
+            var $draggable = $(ui.draggable);		// hold callback f(x)
+            var idCheck = [];						// list menuItem IDS
+
+            //Collect our draggable's child id's:
+            // first add our draggable element's id to the list
+            idCheck.push($draggable.data('id'));
+
+            // then iterate down the dom tree to the last child.
+            $('.sortItem', $draggable).each(function(i, sortItem)
+                {
+                  idCheck.push($(sortItem).data('id')); // add each id 
+                });
+
+            //Cyclic Redundancy Check
+            var $parentSortItem = $target;
+            var cyclic = false;              
+            while($parentSortItem.length)
+            {
+              console.log($parentSortItem.length);
+              var checkId = $parentSortItem.data('id');
+              console.log('checkId', checkId)
+                console.log('against...', idCheck);
+
+              if($.inArray(checkId, idCheck) > -1)
+              {
+                cyclic = true;
+                console.log('THERE WAS A CYCLIC ERROR!');
+                break;
+              }
+              // record all parent tags of our current menuItem container
+              // DIV's sortItem.
+              $parentSortItem = $parentSortItem.parents('.sortItem');
+            } // END WHILE()
+
+            if(cyclic) return false;
+
+            // Finally, the menuItem is legit. now we ensconce it.
+            $draggable.appendTo($target.children('.sortList'));
+
+            // Prevent appending this item to the parent divs
+            // we must avoid duplication: dropping is unidirectional.
+            e.stopPropagation();
+
+          } // END DROP() CALLBACK
+        });
+
+  }
+
+  // Build each section of the list:
+  // A section is composed of:
+  // an outer DIV
+  // an inner 'capsule  with:
+  //							the <h2> draggable 'handle' of the inner DIV
+  //							an appended inner 'container' div for nesting
+  function section(id, name){
+    // build html for each menu Item's label
+    var $handle = $('<h2 />', { text: name });
+
+    // build html for each menu Item's container (to hold nested sections)
+    var $menuBox = $('<div />', { class: 'sortList' });
+
+    // build the menu item itself, with its internal container and text label
+    var $menuItem = $('<div />', {
+      class: 'sortItem section-'+id,
+      data: { id: id },
+      append: [ $handle, $menuBox],		// add inner html to our DIV
+      appendTo: $main
+    }).draggable({				//make handle draggable
+      handle: $handle,
+      revert: true,			
+      helper: 'clone',		//keep list integrity while dragging
+      cursor: 'pointer'		//preserved illusion by making cursor= hand
+    });
+
+    addDroppable($menuItem);
+  }
+
+
+  // Generate main Container Division in HTML
+  var $main = $('<div />', { class: 'root', appendTo: $('body') });
+
+  var $main2 = $('<div />', { 
+    class: 'root2', 
+    appendTo: $('body') 
+  });
+
+  // Make our main Container Division a drop target for each menu item.
+  addDroppable($main);
+  addDroppable($main2);
+
+
+  // Generate Menu Items: one per name in DATA array.
+  // Each call to our generator will pass an unique ID and NAME attribute.
+  $(DATA).each(function(i, name) {	// For each name in the list
+    section(i, name);				// make the name's menu item by index. 
+  });
+
+  // Because pancakes.
+  section(0, 'Pancakes');
+
+  // set container div sortable so we can drag elements to document root also
+  $main.sortable();
+  $main2.sortable();
+
+
+});
+</script>
+</head>
+<body> </body>
+</html>
