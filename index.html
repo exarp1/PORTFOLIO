@@ -40,8 +40,10 @@
   // Models
   //----------------------------------
   app.Todo = Backbone.Model.extend({
-      model: app.Todo,
-      localStorage: new Store("backbone-todo")
+    defaults: {
+      title: '',
+      completed: false
+    }
   });
 
   var AppView = Backbone.View.extend({
