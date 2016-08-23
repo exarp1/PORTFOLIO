@@ -19,6 +19,15 @@
     <ul id="todo-list"></ul>
   </section>
 </section>
+<!-- ========= -->
+<!-- Templates -->
+<!-- ========= -->
+<script type="text/template" id="item-template">
+  <div class="view">
+    <input class="toggle" type="checkbox">
+    <label><%- title %></label>
+  </div>
+</script>
 
 <!-- ========= -->
 <!-- Libraries -->
@@ -58,28 +67,59 @@
   app.todoList = new app.TodoList();
 
 
-  var AppView = Backbone.View.extend({
+  //----------------------------------
+  // Views 
+  //----------------------------------
 
-    // el - stands for element. Every view has a element associate in with HTML content will be rendered.
-    el: '#container',
-
-    // template, courtesy of underscore.js library.
-    template: _.template("<h3>Hello <% who %></h3>"),
-
-    // It's the first function called when this view is instantiated.
-    initialize: function() {
-      this.render();
-    },
-
-    // $el - it's a cached jQuery object (el), in which you can use jQuery functions to push content. 
-    render: function(){
-      this.$el.html(this.template({ who: 'world!' }));
-    }
-
+  // renders individual todo items list (li)
+  app.TodoView = Backbone.View.extend({
+      tagName: 'li',
+      template: _.template($('#item-template').html()),
+      render: function () {
+        this.$el.html(this.template)this.model.toJSON()));
+        return this; // enable chained calls
+      }
   });
 
-// we defined the whole AppView {} object. now to make new view.
-  var appView = new AppView();
+  // renders the full list of todo items calling TodoView for each one. 
+  app.appView = Backbone.View.extend({
+    el: '#todoapp',
+    initialize: function () {
+      this.input = this.$('#new-todo');
+
+      // when new elements are added to the collection render them with addOne
+      app.todoList.on('add', this.addOne, this);
+      app.todoList.on('reset', this.addAll, this);
+      app.todoList.fetch(); // Loads list from local storage
+    },
+    events: { // jQuery version: $('#new-todo').keypress(createTodoOnEnter)
+      'keypress #new-todo': 'createTodoOnEnter'
+    },
+    createTodoOnEnter: function (e) {
+      if (e.which !== 13 || !this.input.val().trim()) { // ENTER_KEY = 13
+        return;
+      }
+      app.todoList.create(this.newAttributes());
+      this.input.val(''); // clean input box
+    },
+    addOne: function(todo){
+      var view = new app.TodoView({ model: todo });
+      $('#todo-list').append(view.render().el);
+    },
+    newAttributes: function(){
+      return {
+        title: this.input.val().trim(),
+        completed: false
+      }
+    }
+  });
+
+  //----------------------------------
+  // Initializers
+  //----------------------------------
+
+  // we defined the whole AppView {} object. now to make new view.
+  app.appView = new app.AppView();
 
 </script>
 
