@@ -32,12 +32,16 @@
   <header id="header">
     <h1>Todos</h1>
     <input id="new-todo" placeholder="What needs to be done?" autofocus>
+    <div>
+      <a href="#/">show all</a> |
+      <a href="#/pending">show pending</a> |
+      <a href="#/">show completed</a>
+    </div>
   </header>
   <section id="main">
     <ul id="todo-list"></ul>
   </section>
 </section>
-
   <div>
     <p>Find the tutorial and code in <a href="http://adrianmejia.com/blog/2012/09/11/backbone-dot-js-for-absolute-beginners-getting-started/">here</a></p>
   </div>  
@@ -170,7 +174,18 @@
     },
     addAll: function(){
       this.$('#todo-list').html(''); // clean the todo list
-      app.todoList.each(this.addOne, this);
+      // filter todo item list
+      switch(window.filter){
+        case 'pending':
+          _.each(app.todoList.remaining(), this.addOne);
+          break;
+        case 'completed':
+          _.each(app.todoList.completed(), this.addOne);
+          break;
+        default:
+          app.todoList.each(this.addOne, this);
+          break;
+      }
     }, 
     newAttributes: function(){
       return {
@@ -181,10 +196,26 @@
   });
 
   //----------------------------------
+  // Routers
+  //----------------------------------
+  
+  app.Router = Backbone.Router.extend({
+    routes: {
+      '*filter' : 'setFilter'
+    },
+    setFilter: function(params) {
+      console.log('app.router.params = ' + params);
+      window.filter = params.trim() || '';
+      app.todoList.trigger('reset');
+    }
+  });
+
+  //----------------------------------
   // Initializers
   //----------------------------------
 
-  // we defined the whole AppView {} object. now to make new view.
+  app.router = new app.Router();
+  Backbone.history.start();
   app.appView = new app.AppView();
 
 </script>
