@@ -45,9 +45,10 @@
 <!-- Templates -->
 <script type="text/template" id="item-template">
   <div class="view">
-    <input class="toggle" type="checkbox">
-    <input class="edit" value="<%- title %>">
+    <input class="toggle" type="checkbox" <%= completed ? 'checked' : '' %>>
     <label><%- title %></label>
+    <input class="edit" value="<%- title %>">
+    <button class="destroy">remove</button>
   </div>
 </script>
 
@@ -74,6 +75,9 @@
     defaults: {
       title: '',
       completed: false // a todo is not complete, by default.
+    },
+    toggle: function(){
+      this.save({ completed: !this.get('completed')});
     }
   });
 
@@ -99,7 +103,43 @@
     template: _.template($('#item-template').html()),
     render: function () {
       this.$el.html(this.template(this.model.toJSON()));
+      this.input = this.$('.edit');
       return this; // enable chained calls
+    },
+    initialize: function(){ 
+      this.model.on('change', this.render, this);
+
+      // remove Convenience Backbone's function for removing the view from the DOM.
+      this.model.on('destroy', this.remove, this); 
+    },
+    events: {
+      'dblclick label': 'edit',
+      'keypress .edit': 'updateOnEnter',
+      'blur .edit'    : 'close',
+      'click .toggle' : 'toggleCompleted',
+      'click .destroy': 'destroy'
+    },
+    edit: function(){
+      this.$el.addClass('editing');
+      this.input.focus();
+    },
+    close: function(){
+      var value = this.input.val().trim();
+      if(value) {
+        this.model.save({ title: value });
+      }
+      this.$el.removeClass('editing');
+    },
+    updateOnEnter: function(e){
+      if(e.which == 13){
+        this.close();
+      }
+    },
+    toggleCompleted: function(){
+      this.model.toggle();
+    },
+    destroy: function(){
+      this.model.destroy();
     }
   });
 
@@ -115,7 +155,7 @@
       app.todoList.fetch(); // Loads list from local storage
     },
     events: { // jQuery version: $('#new-todo').keypress(createTodoOnEnter)
-      'keypress #new-todo': 'createTodoOnEnter'
+      'keypress #new-todo': 'createTodoOnEnter',
     },
     createTodoOnEnter: function (e) {
       if (e.which !== 13 || !this.input.val().trim()) { // ENTER_KEY = 13
