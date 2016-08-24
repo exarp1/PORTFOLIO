@@ -12,6 +12,15 @@
   #todoapp ul {
     list-style-type: none;
   }
+  #todo-list input.edit {
+    display: none; /* Hides input box */
+  }
+  #todo-list .editing label {
+    display: none; /* Hides label text when .editing */
+  }
+  #todo-list .editing input.edit {
+    display: inline; /* Shows input text box when .editing */
+  }
 </style>
 </head>
 <body>
@@ -37,6 +46,7 @@
 <script type="text/template" id="item-template">
   <div class="view">
     <input class="toggle" type="checkbox">
+    <input class="edit" value="<%- title %>">
     <label><%- title %></label>
   </div>
 </script>
