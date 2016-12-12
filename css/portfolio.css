@@ -1,0 +1,54 @@
+/* Grouping Properties:
+ * 1) Box
+ * 2) Border
+ * 3) Background
+ * 4) Text
+ * 5) Other
+
+ * SMACSS style CSS: https://smacss.com/book
+*/
+
+main {
+	height: 100%;
+}
+
+.portfolio {
+	height: 100%;
+	width: 100%;
+}
+
+figcaption {
+	text-align: center;
+}
+
+.intro-blurb {
+	display: inline-block;
+	padding: 10px;
+	margin: 10px;
+}
+
+.work-sample {
+	display: inline-block;
+	padding: 10px;
+	margin: 10px;
+
+	border: 1px solid black;
+	border-radius: 15px;
+
+	background-color: #3D3D3D;
+	color: #FFF;
+}
+
+.sample-img {
+	height: 300px;
+	max-width: 300px;
+
+	border-radius: 15px;
+}
+
+.profile-pic {
+	width: 300px;
+	height: 300px;
+
+	border-radius: 50%;
+}
