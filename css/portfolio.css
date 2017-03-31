@@ -46,7 +46,9 @@ figcaption {
 	border-radius: 15px;
 }
 
-.profile-pic {
+.profile {}
+
+.profile__pic {
 	width: 300px;
 	height: 300px;
 
